@@ -3,5 +3,6 @@
     <string name="phone">Phone number</string>
     <string name="password">Password</string>
     <string name="login">Log in</string>
-    <string name="create_account"><u>Create new account</u></string>
+    <string name="create_new_account"><u>Create new account</u></string>
+    <string name="create_account">Create account</string>
 </resources>
