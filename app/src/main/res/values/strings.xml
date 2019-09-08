@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">Ansa</string>
+    <string name="ansa"><b>Ansa</b></string>
     <string name="phone">Phone number</string>
     <string name="password">Password</string>
     <string name="login">Log in</string>
     <string name="create_new_account"><u>Create new account</u></string>
     <string name="create_account">Create account</string>
+    <string name="join_ansa"><b>Join Ansa</b></string>
+    <string name="create_new_ad"><b>Create new ad</b></string>
 </resources>

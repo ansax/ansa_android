@@ -7,15 +7,29 @@
     android:orientation="vertical">
 
 
-    <TextView
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="New account"
-        android:textColor="@color/colorGreen"
-        android:textSize="@dimen/txt_24"
-        android:layout_gravity="center_horizontal"
-        android:gravity="center_horizontal"/>
+        android:layout_margin="@dimen/dimen_16">
+
+        <ImageView
+            android:id="@+id/back_arrow_image_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:src="@drawable/black_back"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/join_ansa"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/txt_16"
+            android:layout_marginLeft="16dp"
+            android:layout_toRightOf="@id/back_arrow_image_view"/>
+    </RelativeLayout>
 
     <EditText
         android:id="@+id/username_edit_text"
@@ -23,7 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dimen_16"
         android:hint="Full name"
-        android:inputType="textPersonName"
+        android:inputType="textCapWords"
         android:textColorHint="@color/colorGray"
         android:textSize="@dimen/txt_16"
         android:focusable="true"

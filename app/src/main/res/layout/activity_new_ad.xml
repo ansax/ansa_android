@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dimen_16">
+
+        <ImageView
+            android:id="@+id/back_arrow_image_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:src="@drawable/black_back"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/create_new_ad"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/txt_16"
+            android:layout_marginLeft="16dp"
+            android:layout_toRightOf="@id/back_arrow_image_view"/>
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dimen_16"
+        android:layout_marginRight="@dimen/dimen_16"
+        android:textSize="12sp"
+        android:textAlignment="center"
+        android:text="Type your advertisement and then click on the icon below to tag it to your current location"/>
+
+
+    <EditText
+        android:id="@+id/new_ad_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_margin="@dimen/dimen_16"
+        android:padding="@dimen/dimen_10"
+        android:hint="Type here"
+        android:inputType="textCapSentences|textMultiLine"
+        android:textColorHint="@color/colorGray"
+        android:background="@drawable/edit_text_bg"
+        android:textSize="@dimen/dimen_16"
+        android:focusable="true"
+        android:clickable="true"
+        />
+
+    <ImageView
+        android:id="@+id/pin_image_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="@dimen/dimen_16"
+        android:src="@drawable/pin_ad_24"
+        android:tint="@color/colorGreen"
+        />
+
+</LinearLayout>
