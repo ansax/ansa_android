@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/join_ansa"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/colorBlack"
             android:textSize="@dimen/txt_16"
             android:layout_marginLeft="16dp"
             android:layout_toRightOf="@id/back_arrow_image_view"/>
