@@ -42,7 +42,7 @@ public class Ad {
         public int compare(Object o1, Object o2) {
             Ad ad1 =((Ad) o1);
             Ad ad2 =((Ad) o2);
-            return (Double.compare(ad2.getDistance(), ad1.getDistance()));
+            return (Double.compare(ad1.getDistance(), ad2.getDistance()));
         }
     };
 

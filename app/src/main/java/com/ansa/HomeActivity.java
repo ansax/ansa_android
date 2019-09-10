@@ -2,6 +2,7 @@ package com.ansa;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.support.v7.app.AlertDialog;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -31,6 +33,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import cc.cloudist.acplibrary.ACProgressConstant;
+import cc.cloudist.acplibrary.ACProgressFlower;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -54,9 +59,32 @@ public class HomeActivity extends AppCompatActivity {
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
+
+
+        findViewById(R.id.new_ad_text_view).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(HomeActivity.this, NewAdActivity.class));
+            }
+        });
+
+        findViewById(R.id.search_edit_text).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(HomeActivity.this, SearchActivity.class));
+            }
+        });
+
     }
 
     private void loadLatestAds() {
+        final ACProgressFlower dialog = new ACProgressFlower.Builder(this)
+                .direction(ACProgressConstant.DIRECT_CLOCKWISE)
+                .themeColor(Color.WHITE)
+                .fadeColor(Color.DKGRAY).build();
+
+        dialog.show();
+
         String apiUrl = "https://ansax.herokuapp.com/ads/";
 
         RequestQueue mRequestQueue;
@@ -78,6 +106,7 @@ public class HomeActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         // Load the initial JSON request
+                        dialog.cancel();
                         adsList = new ArrayList<>();
                         try {
                             JSONArray ads = response.getJSONArray("ads");
@@ -88,15 +117,14 @@ public class HomeActivity extends AppCompatActivity {
 
                                 String username = ads.getJSONObject(i).getString("username");
                                 String date = formatDate(ads.getJSONObject(i).getString("created"));
-                                /*double distance = calculateDistance(userLatitude, userLongitude
-                                        , adLatitude, adLongitude);*/
+                                double distance = calculateDistance(userLatitude, userLongitude
+                                        , adLatitude, adLongitude);
 
-                                double distance = 1100.43;
                                 String phone = ads.getJSONObject(i).getString("phone");
                                 String message = ads.getJSONObject(i).getString("msg");
                                 adsList.add(new Ad(username, date, distance, phone, message));
                             }
-
+                            dialog.cancel();
                             AdSorter adSorter = new AdSorter(adsList);
                             adsSortedByDistance = adSorter.getAdsSortedByDistance();
                             initializeAdapter();
@@ -108,6 +136,7 @@ public class HomeActivity extends AppCompatActivity {
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
+                                dialog.cancel();
                                 error.printStackTrace();
 
                                 VolleyLog.e("Error: ", error.toString());

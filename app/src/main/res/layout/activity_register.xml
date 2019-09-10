@@ -8,6 +8,7 @@
 
 
     <RelativeLayout
+        android:id="@+id/toolbar_relative_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dimen_16">
@@ -31,6 +32,15 @@
             android:layout_toRightOf="@id/back_arrow_image_view"/>
     </RelativeLayout>
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
     <EditText
         android:id="@+id/username_edit_text"
         android:layout_width="match_parent"
@@ -53,6 +63,7 @@
         android:inputType="phone"
         android:textColorHint="@color/colorGray"
         android:textSize="@dimen/txt_16"
+        android:maxLength="10"
         android:focusable="true"
         android:clickable="true"
         />
@@ -90,7 +101,7 @@
         android:layout_margin="@dimen/dimen_16">
 
         <Button
-            android:id="@+id/login_btn"
+            android:id="@+id/register_btn"
             android:layout_width="wrap_content"
             android:background="@drawable/round_btn"
             android:layout_height="36dp"
@@ -104,5 +115,7 @@
             android:textAlignment="center"
             />
     </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
