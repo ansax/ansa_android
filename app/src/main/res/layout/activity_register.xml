@@ -46,7 +46,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dimen_16"
-        android:hint="Full name"
+        android:hint="Official name"
         android:inputType="textCapWords"
         android:textColorHint="@color/colorGray"
         android:textSize="@dimen/txt_16"

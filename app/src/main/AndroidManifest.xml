@@ -29,8 +29,6 @@
         <activity android:name=".NewAdActivity" />
         <activity android:name=".RegisterActivity" />
         <activity android:name=".SearchActivity" />
-        <activity android:name=".AllChatsActivity" />
-        <activity android:name=".ChatActivity" />
 
     </application>
 

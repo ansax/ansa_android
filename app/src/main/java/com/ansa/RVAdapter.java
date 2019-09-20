@@ -33,15 +33,15 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder> 
             date = (TextView) itemView.findViewById(R.id.date_text_view);
             message = (TextView) itemView.findViewById(R.id.msg_text_view);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
+            /*itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                   String phone = ads.get(getAdapterPosition()).getPhone();
+                   *//*String phone = ads.get(getAdapterPosition()).getPhone();
                     Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phone, null));
-                    itemView.getContext().startActivity(intent);
+                    itemView.getContext().startActivity(intent);*//*
 
                 }
-            });
+            });*/
         }
     }
 

@@ -6,4 +6,5 @@
     <dimen name="txt_16">16sp</dimen>
     <dimen name="txt_24">24sp</dimen>
     <dimen name="dimen_16">16dp</dimen>
+    <dimen name="dimen_8">8dp</dimen>
 </resources>

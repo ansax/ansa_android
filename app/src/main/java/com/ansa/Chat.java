@@ -1,22 +1,33 @@
 package com.ansa;
 
-import java.util.Comparator;
 
 public class Chat {
     String mUsername;
-    int mCounter;
+    String mFromPhone;
+    String mTimeCreated;
+    String mMessage;
 
-    Chat(String name, int counter) {
+    Chat(String name, String fromPhone, String message, String time) {
         this.mUsername = name;
-        this.mCounter = counter;
+        this.mFromPhone = fromPhone;
+        this.mMessage = message;
+        this.mTimeCreated = time;
     }
 
     public String getUsername() {
         return mUsername;
     }
 
-    public int getCounter() {
-        return mCounter;
+    public String getFromPhone() {
+        return mFromPhone;
+    }
+
+    public String getTimeCreated() {
+        return mTimeCreated;
+    }
+
+    public String getMessage() {
+        return mMessage;
     }
 
 

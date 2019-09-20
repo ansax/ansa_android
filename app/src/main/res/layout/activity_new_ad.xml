@@ -46,7 +46,7 @@
         android:layout_height="48dp"
         android:layout_margin="@dimen/dimen_16"
         android:padding="@dimen/dimen_10"
-        android:hint="Type here"
+        android:hint="@string/type_here"
         android:inputType="textCapSentences|textMultiLine"
         android:textColorHint="@color/colorGray"
         android:background="@drawable/edit_text_bg"

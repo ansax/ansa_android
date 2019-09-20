@@ -1,20 +1,31 @@
 package com.ansa;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
+import android.media.MediaPlayer;
+import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,11 +41,16 @@ import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.NoCache;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.engineio.client.transports.WebSocket;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,6 +73,16 @@ public class SearchActivity extends AppCompatActivity {
 
     String searchKeyWords;
 
+    private static Socket mSocket;
+
+    {
+        try {
+            IO.Options options = new IO.Options();
+            options.transports = new String[]{WebSocket.NAME};
+            mSocket = IO.socket("https://ansax.herokuapp.com/", options);
+        } catch (URISyntaxException e) {}
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +97,22 @@ public class SearchActivity extends AppCompatActivity {
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
+
+        rv.addOnItemTouchListener(
+                new RecyclerViewItemClickListener(getBaseContext(), rv ,new RecyclerViewItemClickListener.OnItemClickListener() {
+                    @Override public void onItemClick(View view, int position) {
+                        // do whatever
+                        createMessagePopUp(adsList.get(position).getUsername(), adsList.get(position).getPhone()
+                                , adsList.get(position).getMessage());
+                    }
+
+                    @Override public void onLongItemClick(View view, int position) {
+                        // do whatever
+                        createMessagePopUp(adsList.get(position).getUsername(), adsList.get(position).getPhone(),
+                                adsList.get(position).getMessage());
+                    }
+                })
+        );
 
         findViewById(R.id.back_arrow_image_view).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,7 +142,7 @@ public class SearchActivity extends AppCompatActivity {
                             } else {
                                 rv.setVisibility(View.GONE);
                                 mNoSearchResultTextView.setVisibility(View.VISIBLE);
-                                mNoSearchResultTextView.setText("Search something more specific");
+                                mNoSearchResultTextView.setText("Search for something more specific");
                             }
                         }
                     });
@@ -148,6 +190,9 @@ public class SearchActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        mSocket.on(String.valueOf(getSharedPrefs().get("phone")), onNewMessage);
+        mSocket.connect();
     }
 
     public void search(String searchTerms){
@@ -181,8 +226,8 @@ public class SearchActivity extends AppCompatActivity {
         Network network = new BasicNetwork(new HurlStack());
 
         // Instantiate the request queue
-      //  mRequestQueue = new RequestQueue(new NoCache(), network);
-        mRequestQueue = new RequestQueue(cache, network);
+        mRequestQueue = new RequestQueue(new NoCache(), network);
+        //mRequestQueue = new RequestQueue(cache, network);
 
         // Start the queue
         mRequestQueue.start();
@@ -268,6 +313,93 @@ public class SearchActivity extends AppCompatActivity {
 
     }
 
+    public void createMessagePopUp(final String fromName, final String toPhone, String message){
+        if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
+            final AlertDialog dialogBuilder = new AlertDialog.Builder(this).create();
+            LayoutInflater inflater = this.getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.custom_dialog, null);
+
+            final EditText editText = (EditText) dialogView.findViewById(R.id.message_edit_text);
+            TextView usernameTextView = (TextView) dialogView.findViewById(R.id.from_name_text_view);
+            TextView messageTextView = (TextView) dialogView.findViewById(R.id.message_text_view);
+            ImageView sendBtn = (ImageView) dialogView.findViewById(R.id.send_button);
+
+            usernameTextView.setText(fromName);
+            messageTextView.setText(message);
+
+            sendBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String msg = editText.getText().toString().trim();
+                    if (!TextUtils.isEmpty(msg)) {
+                        sendMessage(toPhone, msg);
+                    }
+                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+                    dialogBuilder.dismiss();
+                }
+            });
+
+            dialogBuilder.setView(dialogView);
+            dialogBuilder.show();
+        }
+    }
+
+    public void sendMessage(String toPhone, String msg){
+
+        HashMap<String, String> message = new HashMap<String, String>();
+        message.put("username", String.valueOf(getSharedPrefs().get("username")));
+        message.put("to_phone", toPhone);
+        message.put("from_phone", String.valueOf(getSharedPrefs().get("phone")));
+        message.put("message", msg);
+
+
+        mSocket.emit("send message", new JSONObject(message));
+        vibrate();
+    }
+
+    private void vibrate(){
+
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(300, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            vibrator.vibrate(300);
+        }
+    }
+
+    private  void playMessageReceivedTone(){
+        MediaPlayer mediaPlayer = MediaPlayer.create(SearchActivity.this, R.raw.received);
+        mediaPlayer.start();
+    }
+
+
+    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            SearchActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    String message;
+                    String fromPhone;
+                    String time;
+                    try {
+                        username = data.getString("username");
+                        message = data.getString("message");
+                        fromPhone = data.getString( "from_phone");
+                        createMessagePopUp(username, fromPhone, message);
+                        playMessageReceivedTone();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+                }
+            });
+        }
+    };
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -284,5 +416,22 @@ public class SearchActivity extends AppCompatActivity {
 
             }
         }
+    }
+
+    public HashMap getSharedPrefs(){
+        String MyPREFERENCES = "MyPrefs" ;
+        String USER_PHONE = "phoneKey";
+        String USER_NAME = "usernameKey";
+
+        SharedPreferences sharedPreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+
+        String name = sharedPreferences.getString(USER_NAME, "");
+        String phone = sharedPreferences.getString(USER_PHONE, "");
+
+        HashMap<String, String> userParameters = new HashMap<String, String>();
+        userParameters.put("phone", phone);
+        userParameters.put("username", name);
+
+        return userParameters;
     }
 }
