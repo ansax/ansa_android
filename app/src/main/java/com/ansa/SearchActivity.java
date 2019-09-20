@@ -1,6 +1,7 @@
 package com.ansa;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.NoCache;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,6 +40,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import cc.cloudist.acplibrary.ACProgressConstant;
+import cc.cloudist.acplibrary.ACProgressFlower;
+
 public class SearchActivity extends AppCompatActivity {
 
     EditText mSearchView;
@@ -45,6 +50,7 @@ public class SearchActivity extends AppCompatActivity {
     private ArrayList<Ad> adsList;
     ArrayList adsSortedByDistance;
     private RecyclerView rv;
+    private TextView mNoSearchResultTextView;
     private static final int SECOND_ACTIVITY_REQUEST_CODE = 2019;
     double userLatitude;
     double userLongitude;
@@ -60,6 +66,7 @@ public class SearchActivity extends AppCompatActivity {
         mSearchTextView = (TextView) findViewById(R.id.search_text_view);
 
         rv=(RecyclerView)findViewById(R.id.rv);
+        mNoSearchResultTextView=(TextView) findViewById(R.id.no_search_result_text_view);
 
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
@@ -72,6 +79,7 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
 
+
         mSearchView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -80,13 +88,20 @@ public class SearchActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(final CharSequence s, int start, int before, int count) {
+                mNoSearchResultTextView.setVisibility(View.GONE);
                 if (s.length() > 0) {
                     mSearchTextView.setVisibility(View.VISIBLE);
                     mSearchTextView.setClickable(false);
                     mSearchTextView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            search(String.valueOf(s));
+                            if (s.length() > 2) {
+                                search(String.valueOf(s));
+                            } else {
+                                rv.setVisibility(View.GONE);
+                                mNoSearchResultTextView.setVisibility(View.VISIBLE);
+                                mNoSearchResultTextView.setText("Search something more specific");
+                            }
                         }
                     });
                 }else {
@@ -104,10 +119,14 @@ public class SearchActivity extends AppCompatActivity {
         mSearchView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE){
+                if (actionId == EditorInfo.IME_ACTION_SEARCH){
                     String searchTerms = mSearchView.getText().toString().trim();
-                    if (!searchTerms.isEmpty()){
+                    if (searchTerms.length() > 2){
                        search(searchTerms);
+                    } else {
+                        rv.setVisibility(View.GONE);
+                        mNoSearchResultTextView.setVisibility(View.VISIBLE);
+                        mNoSearchResultTextView.setText("Search something more specific");
                     }
 
                 }
@@ -137,7 +156,20 @@ public class SearchActivity extends AppCompatActivity {
         startActivityForResult(intent, SECOND_ACTIVITY_REQUEST_CODE);
     }
 
-    private void loadAds(String searchKeyWords) {
+    private void loadAds(final String searchKeyWords) {
+        final ACProgressFlower dialog = new ACProgressFlower.Builder(this)
+                .direction(ACProgressConstant.DIRECT_CLOCKWISE)
+                .themeColor(Color.BLACK)
+                .fadeColor(Color.LTGRAY)
+                .bgColor(Color.WHITE)
+                .petalThickness(3)
+                .petalAlpha(1f)
+                .petalCount(9)
+                .sizeRatio(.2f)
+                .build();
+
+        dialog.show();
+
         String apiUrl = "https://ansax.herokuapp.com/search";
 
         RequestQueue mRequestQueue;
@@ -149,6 +181,7 @@ public class SearchActivity extends AppCompatActivity {
         Network network = new BasicNetwork(new HurlStack());
 
         // Instantiate the request queue
+      //  mRequestQueue = new RequestQueue(new NoCache(), network);
         mRequestQueue = new RequestQueue(cache, network);
 
         // Start the queue
@@ -163,13 +196,19 @@ public class SearchActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         // Load the initial JSON request
+                        dialog.cancel();
+                        Log.d("xxxxx",  response.toString());
                         adsList = new ArrayList<>();
                         try {
                             JSONArray ads = response.getJSONArray("search_results");
                             if (ads.length() == 0 ){
-                                Toast.makeText(getBaseContext(), "Hiyo hakuna", Toast.LENGTH_SHORT).show();
+                                Log.d("xxxxx",  "no result");
+                                rv.setVisibility(View.GONE);
+                                mNoSearchResultTextView.setVisibility(View.VISIBLE);
+                                mNoSearchResultTextView.setText(searchKeyWords + " is not available. Create an ad saying you want " + searchKeyWords);
                             } else {
                                 for (int i = 0; i < ads.length(); i++) {
+                                    rv.setVisibility(View.VISIBLE);
                                     double adLatitude = ads.getJSONObject(i).getDouble("latitude");
                                     double adLongitude = ads.getJSONObject(i).getDouble("longitude");
 
@@ -190,12 +229,14 @@ public class SearchActivity extends AppCompatActivity {
                             }
 
                         } catch (JSONException e) {
+                            dialog.cancel();
                             e.printStackTrace();
                         }
                     } },
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
+                                dialog.cancel();
                                 error.printStackTrace();
 
                                 VolleyLog.e("Error: ", error.toString());

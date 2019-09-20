@@ -181,7 +181,7 @@ public class LocationActivity extends AppCompatActivity
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             new AlertDialog.Builder(LocationActivity.this).
-                    setMessage("Please allow location").
+                    setMessage("Please allow location services").
                     setPositiveButton("OK", null).create().show();
         }
 

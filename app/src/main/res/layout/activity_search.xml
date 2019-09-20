@@ -39,7 +39,7 @@
             android:paddingRight="10dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:hint="Search"
+            android:hint="@string/search"
             android:inputType="text"
             android:textColorHint="@color/colorGray"
             android:background="@drawable/round_edit_text"
@@ -49,6 +49,7 @@
             android:clickable="true"
             android:layout_toRightOf="@id/back_arrow_image_view"
             android:layout_toLeftOf="@id/search_text_view"
+            android:imeOptions="actionSearch"
             />
 
     </RelativeLayout>
@@ -57,6 +58,15 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:id="@+id/rv"
+        />
+    <TextView
+        android:id="@+id/no_search_result_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dimen_16"
+        android:layout_marginRight="@dimen/dimen_16"
+        android:textSize="12sp"
+        android:textAlignment="center"
         />
 
 </LinearLayout>

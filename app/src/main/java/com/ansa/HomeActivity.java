@@ -74,14 +74,26 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(new Intent(HomeActivity.this, SearchActivity.class));
             }
         });
+         findViewById(R.id.chats_text_view).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(new Intent(HomeActivity.this, AllChatsActivity.class));
+                    }
+                });
 
     }
 
     private void loadLatestAds() {
         final ACProgressFlower dialog = new ACProgressFlower.Builder(this)
                 .direction(ACProgressConstant.DIRECT_CLOCKWISE)
-                .themeColor(Color.WHITE)
-                .fadeColor(Color.DKGRAY).build();
+                .themeColor(Color.BLACK)
+                .fadeColor(Color.LTGRAY)
+                .bgColor(Color.WHITE)
+                .petalThickness(3)
+                .petalAlpha(1f)
+                .petalCount(9)
+                .sizeRatio(.2f)
+                .build();
 
         dialog.show();
 
@@ -116,6 +128,7 @@ public class HomeActivity extends AppCompatActivity {
                                 double adLongitude = ads.getJSONObject(i).getDouble("longitude");
 
                                 String username = ads.getJSONObject(i).getString("username");
+                                Log.d("xxxxxx", ads.getJSONObject(i).getString("created"));
                                 String date = formatDate(ads.getJSONObject(i).getString("created"));
                                 double distance = calculateDistance(userLatitude, userLongitude
                                         , adLatitude, adLongitude);

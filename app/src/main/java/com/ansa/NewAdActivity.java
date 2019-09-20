@@ -59,9 +59,11 @@ public class NewAdActivity extends AppCompatActivity {
 
                 adMessage = mAdMessageEditText.getText().toString().trim();
 
-                if(!adMessage.isEmpty()){
+                if(adMessage.length() > 2){
                     Intent intent = new Intent(NewAdActivity.this, LocationActivity.class);
                     startActivityForResult(intent, SECOND_ACTIVITY_REQUEST_CODE);
+                }else {
+                    mAdMessageEditText.setError("Make ad more specific");
                 }
             }
         });
@@ -70,8 +72,14 @@ public class NewAdActivity extends AppCompatActivity {
     public void createAd(String message, String latitude, String longitude){
         final ACProgressFlower dialog = new ACProgressFlower.Builder(this)
                 .direction(ACProgressConstant.DIRECT_CLOCKWISE)
-                .themeColor(Color.WHITE)
-                .fadeColor(Color.DKGRAY).build();
+                .themeColor(Color.BLACK)
+                .fadeColor(Color.LTGRAY)
+                .bgColor(Color.WHITE)
+                .petalThickness(3)
+                .petalAlpha(1f)
+                .petalCount(9)
+                .sizeRatio(.2f)
+                .build();
 
         dialog.show();
 
@@ -108,6 +116,7 @@ public class NewAdActivity extends AppCompatActivity {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         mAdMessageEditText.setText(null);
+                                        startActivity(new Intent(NewAdActivity.this, HomeActivity.class));
                                     }
                                 }).create().show();
                     } },
@@ -115,6 +124,14 @@ public class NewAdActivity extends AppCompatActivity {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 dialog.cancel();
+                                new AlertDialog.Builder(NewAdActivity.this).
+                                        setMessage("Switch on GPS and internet then try again").
+                                        setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                return;
+                                            }
+                                        }).create().show();
                                 error.printStackTrace();
 
                                 VolleyLog.e("Error: ", error.toString());

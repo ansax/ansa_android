@@ -11,16 +11,28 @@
         android:layout_margin="@dimen/dimen_16">
 
 
+        <TextView
+            android:id="@+id/chats_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chats "
+            android:textSize="12sp"
+            android:textColor="@color/colorGreen"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="8dp"
+            />
+
     <TextView
         android:id="@+id/new_ad_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="New ad"
-        android:textSize="16sp"
+        android:textSize="12sp"
         android:textColor="@color/colorGreen"
         android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginLeft="8dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="8dp"
         />
 
     <EditText
@@ -36,7 +48,8 @@
         android:textSize="12sp"
         android:focusable="true"
         android:clickable="true"
-        android:layout_toLeftOf="@id/new_ad_text_view"
+        android:layout_toRightOf="@id/new_ad_text_view"
+        android:layout_toLeftOf="@id/chats_text_view"
         />
     </RelativeLayout>
 

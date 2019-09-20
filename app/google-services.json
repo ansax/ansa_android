@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "45064303099",
+    "firebase_url": "https://ansa-c122f.firebaseio.com",
+    "project_id": "ansa-c122f",
+    "storage_bucket": "ansa-c122f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:45064303099:android:c1b1b56c0ee4c52d12db5e",
+        "android_client_info": {
+          "package_name": "com.ansa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "45064303099-s8119vpgl6cp6o9aeilpc06j32orit6c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBctGD6Hj3Bxk4gVwYZNwxUNMS0VJdv4DU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "45064303099-s8119vpgl6cp6o9aeilpc06j32orit6c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

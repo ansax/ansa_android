@@ -115,8 +115,14 @@ public class LoginActivity extends AppCompatActivity {
     public void login(String phone, String password) {
         final ACProgressFlower dialog = new ACProgressFlower.Builder(this)
                 .direction(ACProgressConstant.DIRECT_CLOCKWISE)
-                .themeColor(Color.WHITE)
-                .fadeColor(Color.DKGRAY).build();
+                .themeColor(Color.BLACK)
+                .fadeColor(Color.LTGRAY)
+                .bgColor(Color.WHITE)
+                .petalThickness(3)
+                .petalAlpha(1f)
+                .petalCount(9)
+                .sizeRatio(.2f)
+                .build();
 
         dialog.show();
 
@@ -162,7 +168,7 @@ public class LoginActivity extends AppCompatActivity {
                                 mPhoneEditText.setText(null);
                                 mPasswordEditText.setText(null);
                                 new AlertDialog.Builder(LoginActivity.this).
-                                        setMessage("Wrong phone number or password").
+                                        setMessage("Check phone number and password then try again").
                                         setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {

@@ -37,7 +37,7 @@
         android:layout_marginRight="@dimen/dimen_16"
         android:textSize="12sp"
         android:textAlignment="center"
-        android:text="Type your advertisement and then click on the icon below to tag it to your current location"/>
+        android:text="Type your ad then click on the green icon below to tag it to your current location"/>
 
 
     <EditText
@@ -51,6 +51,7 @@
         android:textColorHint="@color/colorGray"
         android:background="@drawable/edit_text_bg"
         android:textSize="@dimen/dimen_16"
+        android:maxLength="140"
         android:focusable="true"
         android:clickable="true"
         />

@@ -8,4 +8,5 @@
     <string name="create_account">Create account</string>
     <string name="join_ansa"><b>Join Ansa</b></string>
     <string name="create_new_ad"><b>Create new ad</b></string>
+    <string name="search">Search…</string>
 </resources>
