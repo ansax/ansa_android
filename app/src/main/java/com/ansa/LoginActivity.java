@@ -185,6 +185,16 @@ public class LoginActivity extends AppCompatActivity {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 dialog.cancel();
+
+                                new AlertDialog.Builder(LoginActivity.this).
+                                        setMessage("Please try again").
+                                        setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                return;
+                                            }
+                                        }).create().show();
+
                                 error.printStackTrace();
 
                                 VolleyLog.e("Error: ", error.toString());

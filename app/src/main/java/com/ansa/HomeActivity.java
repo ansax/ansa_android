@@ -11,6 +11,7 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -52,14 +53,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
-import cc.cloudist.acplibrary.ACProgressConstant;
-import cc.cloudist.acplibrary.ACProgressFlower;
-
 public class HomeActivity extends AppCompatActivity {
 
     private ArrayList<Ad> adsList;
     ArrayList adsSortedByDistance;
     private RecyclerView rv;
+    SwipeRefreshLayout swipeRefreshLayout;
     private static final int SECOND_ACTIVITY_REQUEST_CODE = 2019;
     double userLatitude;
     double userLongitude;
@@ -82,6 +81,14 @@ public class HomeActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LocationActivity.class);
         startActivityForResult(intent, SECOND_ACTIVITY_REQUEST_CODE);
 
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadLatestAds();
+            }
+        });
+
         rv=(RecyclerView)findViewById(R.id.rv);
 
         LinearLayoutManager llm = new LinearLayoutManager(this);
@@ -92,14 +99,22 @@ public class HomeActivity extends AppCompatActivity {
                 new RecyclerViewItemClickListener(getBaseContext(), rv ,new RecyclerViewItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
                         // do whatever
-                        createMessagePopUp(adsList.get(position).getUsername(), adsList.get(position).getPhone()
-                                , adsList.get(position).getMessage());
+                        String toPhone = adsList.get(position).getPhone();
+
+                        if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
+                            createMessagePopUp(adsList.get(position).getUsername(), toPhone
+                                    , adsList.get(position).getMessage(), adsList.get(position).getDate());
+                        }
                     }
 
                     @Override public void onLongItemClick(View view, int position) {
                         // do whatever
-                        createMessagePopUp(adsList.get(position).getUsername(), adsList.get(position).getPhone(),
-                                adsList.get(position).getMessage());
+                        String toPhone = adsList.get(position).getPhone();
+
+                        if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
+                            createMessagePopUp(adsList.get(position).getUsername(), toPhone
+                                    , adsList.get(position).getMessage(), adsList.get(position).getDate());
+                        }
                     }
                 })
         );
@@ -124,19 +139,26 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
-    private void loadLatestAds() {
-        final ACProgressFlower dialog = new ACProgressFlower.Builder(this)
-                .direction(ACProgressConstant.DIRECT_CLOCKWISE)
-                .themeColor(Color.BLACK)
-                .fadeColor(Color.LTGRAY)
-                .bgColor(Color.WHITE)
-                .petalThickness(3)
-                .petalAlpha(1f)
-                .petalCount(9)
-                .sizeRatio(.2f)
-                .build();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadLatestAds();
+    }
 
-        dialog.show();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        loadLatestAds();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        loadLatestAds();
+    }
+
+    private void loadLatestAds() {
+        swipeRefreshLayout.setRefreshing(true);
 
         String apiUrl = "https://ansax.herokuapp.com/ads/";
 
@@ -159,11 +181,10 @@ public class HomeActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         // Load the initial JSON request
-                        dialog.cancel();
+                        swipeRefreshLayout.setRefreshing(false);
                         adsList = new ArrayList<>();
                         try {
                             JSONArray ads = response.getJSONArray("ads");
-                            Log.d("xxxxx", ads.toString());
                             for (int i = 0; i < ads.length(); i++){
                                 double adLatitude = ads.getJSONObject(i).getDouble("latitude");
                                 double adLongitude = ads.getJSONObject(i).getDouble("longitude");
@@ -177,7 +198,7 @@ public class HomeActivity extends AppCompatActivity {
                                 String message = ads.getJSONObject(i).getString("msg");
                                 adsList.add(new Ad(username, date, distance, phone, message));
                             }
-                            dialog.cancel();
+                         //   dialog.cancel();
                             AdSorter adSorter = new AdSorter(adsList);
                             adsSortedByDistance = adSorter.getAdsSortedByDistance();
                             initializeAdapter();
@@ -189,7 +210,15 @@ public class HomeActivity extends AppCompatActivity {
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                dialog.cancel();
+                                swipeRefreshLayout.setRefreshing(false);
+                                new AlertDialog.Builder(HomeActivity.this).
+                                        setMessage("Check whether you have internet").
+                                        setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                return;
+                                            }
+                                        }).create().show();
                                 error.printStackTrace();
 
                                 VolleyLog.e("Error: ", error.toString());
@@ -220,38 +249,39 @@ public class HomeActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
     }
 
-    public void createMessagePopUp(final String fromName, final String toPhone, String message){
-      if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
-            final AlertDialog dialogBuilder = new AlertDialog.Builder(this).create();
-            LayoutInflater inflater = this.getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.custom_dialog, null);
+    public void createMessagePopUp(final String fromName, final String toPhone, String message, String time){
+        final AlertDialog dialogBuilder = new AlertDialog.Builder(this).create();
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.custom_dialog, null);
 
-            final EditText editText = (EditText) dialogView.findViewById(R.id.message_edit_text);
-            TextView usernameTextView = (TextView) dialogView.findViewById(R.id.from_name_text_view);
-            TextView messageTextView = (TextView) dialogView.findViewById(R.id.message_text_view);
-            ImageView sendBtn = (ImageView) dialogView.findViewById(R.id.send_button);
+        final EditText editText = (EditText) dialogView.findViewById(R.id.message_edit_text);
+        TextView usernameTextView = (TextView) dialogView.findViewById(R.id.from_name_text_view);
+        TextView messageTextView = (TextView) dialogView.findViewById(R.id.message_text_view);
+        TextView timeTextView = (TextView) dialogView.findViewById(R.id.time_text_view);
+        ImageView sendBtn = (ImageView) dialogView.findViewById(R.id.send_button);
 
-            usernameTextView.setText(fromName);
-            messageTextView.setText(message);
+        usernameTextView.setText(fromName);
+        messageTextView.setText(message);
+        timeTextView.setText(time);
 
-            sendBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    String msg = editText.getText().toString().trim();
-                    if (!TextUtils.isEmpty(msg)) {
-                        vibrate();
-                        sendMessage(toPhone, msg);
-                    }
-                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-                    dialogBuilder.dismiss();
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String msg = editText.getText().toString().trim();
+                if (!TextUtils.isEmpty(msg)) {
+                    sendMessage(toPhone, msg);
+                    vibrate();
                 }
-            });
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+                dialogBuilder.dismiss();
+            }
+        });
 
-            dialogBuilder.setView(dialogView);
-            dialogBuilder.show();
-        }
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.show();
     }
+
 
     public void sendMessage(String toPhone, String msg){
 
@@ -296,7 +326,8 @@ public class HomeActivity extends AppCompatActivity {
                         username = data.getString("username");
                         message = data.getString("message");
                         fromPhone = data.getString( "from_phone");
-                        createMessagePopUp(username, fromPhone, message);
+                        time = getTime(data.getString( "created"));
+                        createMessagePopUp(username, fromPhone, message, time);
                         playMessageReceivedTone();
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -306,6 +337,11 @@ public class HomeActivity extends AppCompatActivity {
             });
         }
     };
+
+    private String getTime(String date){
+        SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("h:mm aa");
+        return simpleTimeFormat.format(new Date(date));
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -342,10 +378,6 @@ public class HomeActivity extends AppCompatActivity {
         return userParameters;
     }
 
-    /*private String getTime(String date){
-        SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("h:mm aa");
-        String time = simpleTimeFormat.format(new Date(date));
-        return time;
-    }*/
+
 
 }

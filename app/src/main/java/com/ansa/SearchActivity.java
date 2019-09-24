@@ -102,14 +102,23 @@ public class SearchActivity extends AppCompatActivity {
                 new RecyclerViewItemClickListener(getBaseContext(), rv ,new RecyclerViewItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
                         // do whatever
-                        createMessagePopUp(adsList.get(position).getUsername(), adsList.get(position).getPhone()
-                                , adsList.get(position).getMessage());
+                        String toPhone = adsList.get(position).getPhone();
+
+                        if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
+                            createMessagePopUp(adsList.get(position).getUsername(), toPhone
+                                    , adsList.get(position).getMessage(), adsList.get(position).getDate());
+                        }
+
                     }
 
                     @Override public void onLongItemClick(View view, int position) {
                         // do whatever
-                        createMessagePopUp(adsList.get(position).getUsername(), adsList.get(position).getPhone(),
-                                adsList.get(position).getMessage());
+                        String toPhone = adsList.get(position).getPhone();
+
+                        if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
+                            createMessagePopUp(adsList.get(position).getUsername(), toPhone
+                                    , adsList.get(position).getMessage(), adsList.get(position).getDate());
+                        }
                     }
                 })
         );
@@ -168,7 +177,7 @@ public class SearchActivity extends AppCompatActivity {
                     } else {
                         rv.setVisibility(View.GONE);
                         mNoSearchResultTextView.setVisibility(View.VISIBLE);
-                        mNoSearchResultTextView.setText("Search something more specific");
+                        mNoSearchResultTextView.setText("Search for something more specific");
                     }
 
                 }
@@ -234,7 +243,6 @@ public class SearchActivity extends AppCompatActivity {
 
         HashMap<String, String> parametersObject = new HashMap<String, String>();
         parametersObject.put("search_terms", searchKeyWords);
-        Log.d("xxxxx",  parametersObject.get("search_terms") + " :");
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.POST, apiUrl, new JSONObject(parametersObject), new Response.Listener<JSONObject>() {
@@ -242,12 +250,10 @@ public class SearchActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         // Load the initial JSON request
                         dialog.cancel();
-                        Log.d("xxxxx",  response.toString());
                         adsList = new ArrayList<>();
                         try {
                             JSONArray ads = response.getJSONArray("search_results");
                             if (ads.length() == 0 ){
-                                Log.d("xxxxx",  "no result");
                                 rv.setVisibility(View.GONE);
                                 mNoSearchResultTextView.setVisibility(View.VISIBLE);
                                 mNoSearchResultTextView.setText(searchKeyWords + " is not available. Create an ad saying you want " + searchKeyWords);
@@ -275,6 +281,8 @@ public class SearchActivity extends AppCompatActivity {
 
                         } catch (JSONException e) {
                             dialog.cancel();
+                            mNoSearchResultTextView.setVisibility(View.VISIBLE);
+                            mNoSearchResultTextView.setText("Please try again");
                             e.printStackTrace();
                         }
                     } },
@@ -282,6 +290,8 @@ public class SearchActivity extends AppCompatActivity {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 dialog.cancel();
+                                mNoSearchResultTextView.setVisibility(View.VISIBLE);
+                                mNoSearchResultTextView.setText("Please try again");
                                 error.printStackTrace();
 
                                 VolleyLog.e("Error: ", error.toString());
@@ -301,6 +311,7 @@ public class SearchActivity extends AppCompatActivity {
         return dayMonth + " at " + time;
     }
 
+
     public static double calculateDistance(double userCurrentLatitude, double userCurrentLongitude, double adLatitude, double adLongitude) {
         float[] result = new float[1];
         Location.distanceBetween(userCurrentLatitude, userCurrentLongitude, adLatitude, adLongitude, result);
@@ -313,36 +324,37 @@ public class SearchActivity extends AppCompatActivity {
 
     }
 
-    public void createMessagePopUp(final String fromName, final String toPhone, String message){
-        if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
-            final AlertDialog dialogBuilder = new AlertDialog.Builder(this).create();
-            LayoutInflater inflater = this.getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.custom_dialog, null);
+    public void createMessagePopUp(final String fromName, final String toPhone, String message, String time){
+        final AlertDialog dialogBuilder = new AlertDialog.Builder(this).create();
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.custom_dialog, null);
 
-            final EditText editText = (EditText) dialogView.findViewById(R.id.message_edit_text);
-            TextView usernameTextView = (TextView) dialogView.findViewById(R.id.from_name_text_view);
-            TextView messageTextView = (TextView) dialogView.findViewById(R.id.message_text_view);
-            ImageView sendBtn = (ImageView) dialogView.findViewById(R.id.send_button);
+        final EditText editText = (EditText) dialogView.findViewById(R.id.message_edit_text);
+        TextView usernameTextView = (TextView) dialogView.findViewById(R.id.from_name_text_view);
+        TextView messageTextView = (TextView) dialogView.findViewById(R.id.message_text_view);
+        TextView timeTextView = (TextView) dialogView.findViewById(R.id.time_text_view);
+        ImageView sendBtn = (ImageView) dialogView.findViewById(R.id.send_button);
 
-            usernameTextView.setText(fromName);
-            messageTextView.setText(message);
+        usernameTextView.setText(fromName);
+        messageTextView.setText(message);
+        timeTextView.setText(time);
 
-            sendBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    String msg = editText.getText().toString().trim();
-                    if (!TextUtils.isEmpty(msg)) {
-                        sendMessage(toPhone, msg);
-                    }
-                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-                    dialogBuilder.dismiss();
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String msg = editText.getText().toString().trim();
+                if (!TextUtils.isEmpty(msg)) {
+                    sendMessage(toPhone, msg);
                 }
-            });
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+                dialogBuilder.dismiss();
+            }
+        });
 
-            dialogBuilder.setView(dialogView);
-            dialogBuilder.show();
-        }
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.show();
+
     }
 
     public void sendMessage(String toPhone, String msg){
@@ -389,7 +401,8 @@ public class SearchActivity extends AppCompatActivity {
                         username = data.getString("username");
                         message = data.getString("message");
                         fromPhone = data.getString( "from_phone");
-                        createMessagePopUp(username, fromPhone, message);
+                        time = getTime(data.getString( "created"));
+                        createMessagePopUp(username, fromPhone, message, time);
                         playMessageReceivedTone();
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -399,6 +412,11 @@ public class SearchActivity extends AppCompatActivity {
             });
         }
     };
+
+    private String getTime(String date){
+        SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("h:mm aa");
+        return simpleTimeFormat.format(new Date(date));
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -434,4 +452,5 @@ public class SearchActivity extends AppCompatActivity {
 
         return userParameters;
     }
+
 }

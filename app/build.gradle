@@ -6,8 +6,8 @@ android {
         applicationId "com.ansa"
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 6
-        versionName "1.0.6"
+        versionCode 7
+        versionName "1.0.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -37,4 +37,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation 'cc.cloudist.acplibrary:library:1.2.1'
     implementation 'com.github.nkzawa:socket.io-client:0.6.0'
+    implementation 'com.android.support:swiperefreshlayout:28.0.0'
 }
