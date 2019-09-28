@@ -1,10 +1,8 @@
 package com.ansa;
 
-import android.content.Intent;
-import android.net.Uri;
+
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +20,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder> 
         TextView date;
         TextView distance;
         TextView message;
-        public View container;
 
 
         PersonViewHolder(final View itemView) {
@@ -32,17 +29,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder> 
             distance = (TextView)itemView.findViewById(R.id.distance_text_view);
             date = (TextView) itemView.findViewById(R.id.date_text_view);
             message = (TextView) itemView.findViewById(R.id.msg_text_view);
-
-            /*itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                   *//*String phone = ads.get(getAdapterPosition()).getPhone();
-                    Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phone, null));
-                    itemView.getContext().startActivity(intent);*//*
-
-                }
-            });*/
         }
+
     }
 
     static List<Ad> ads;

@@ -45,6 +45,7 @@ import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.engineio.client.transports.WebSocket;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -114,11 +115,19 @@ public class SearchActivity extends AppCompatActivity {
                     @Override public void onLongItemClick(View view, int position) {
                         // do whatever
                         String toPhone = adsList.get(position).getPhone();
-
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable("user_position", adsList.get(position).getUserLatLng());
+                        bundle.putParcelable("ad_position", adsList.get(position).getAdLatLng());
                         if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
-                            createMessagePopUp(adsList.get(position).getUsername(), toPhone
-                                    , adsList.get(position).getMessage(), adsList.get(position).getDate());
+                            bundle.putString("username", adsList.get(position).getUsername() + " on " +
+                                    adsList.get(position).getDate());
+                        }else {
+                            bundle.putString("username", "You on " + adsList.get(position).getDate());
                         }
+                        bundle.putString("message", adsList.get(position).getMessage());
+                        Intent intent = new Intent(SearchActivity.this, MapsActivity.class);
+                        intent.putExtra("bundle", bundle);
+                        startActivity(intent);
                     }
                 })
         );
@@ -270,7 +279,8 @@ public class SearchActivity extends AppCompatActivity {
 
                                     String phone = ads.getJSONObject(i).getString("phone");
                                     String message = ads.getJSONObject(i).getString("msg");
-                                    adsList.add(new Ad(username, date, distance, phone, message));
+                                    adsList.add(new Ad(username, date, distance, phone, message, new LatLng(userLatitude, userLongitude),
+                                            new LatLng(adLatitude, adLongitude)));
                                 }
 
                                 AdSorter adSorter = new AdSorter(adsList);
@@ -280,9 +290,6 @@ public class SearchActivity extends AppCompatActivity {
                             }
 
                         } catch (JSONException e) {
-                            dialog.cancel();
-                            mNoSearchResultTextView.setVisibility(View.VISIBLE);
-                            mNoSearchResultTextView.setText("Please try again");
                             e.printStackTrace();
                         }
                     } },
@@ -291,7 +298,7 @@ public class SearchActivity extends AppCompatActivity {
                             public void onErrorResponse(VolleyError error) {
                                 dialog.cancel();
                                 mNoSearchResultTextView.setVisibility(View.VISIBLE);
-                                mNoSearchResultTextView.setText("Please try again");
+                                mNoSearchResultTextView.setText("Check internet then try again");
                                 error.printStackTrace();
 
                                 VolleyLog.e("Error: ", error.toString());

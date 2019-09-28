@@ -1,16 +1,21 @@
 package com.ansa;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -42,6 +47,7 @@ import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.engineio.client.transports.WebSocket;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -110,11 +116,20 @@ public class HomeActivity extends AppCompatActivity {
                     @Override public void onLongItemClick(View view, int position) {
                         // do whatever
                         String toPhone = adsList.get(position).getPhone();
-
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable("user_position", adsList.get(position).getUserLatLng());
+                        bundle.putParcelable("ad_position", adsList.get(position).getAdLatLng());
                         if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
-                            createMessagePopUp(adsList.get(position).getUsername(), toPhone
-                                    , adsList.get(position).getMessage(), adsList.get(position).getDate());
+                            bundle.putString("username", adsList.get(position).getUsername() + " on " +
+                                    adsList.get(position).getDate());
+                        }else {
+                            bundle.putString("username", "You on " + adsList.get(position).getDate());
                         }
+                        bundle.putString("message", adsList.get(position).getMessage());
+                        Intent intent = new Intent(HomeActivity.this, MapsActivity.class);
+                        intent.putExtra("bundle", bundle);
+                        startActivity(intent);
+
                     }
                 })
         );
@@ -139,22 +154,38 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
+    private BroadcastReceiver networkChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager connectivityManager = (ConnectivityManager)
+                    getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+            if ( activeNetwork != null && activeNetwork.isConnected()) {
+                loadLatestAds();
+            }
+        }
+    };
+
     @Override
     protected void onResume() {
         super.onResume();
-        loadLatestAds();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        loadLatestAds();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkChangeReceiver, intentFilter);
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        loadLatestAds();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkChangeReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(networkChangeReceiver);
     }
 
     private void loadLatestAds() {
@@ -196,7 +227,8 @@ public class HomeActivity extends AppCompatActivity {
 
                                 String phone = ads.getJSONObject(i).getString("phone");
                                 String message = ads.getJSONObject(i).getString("msg");
-                                adsList.add(new Ad(username, date, distance, phone, message));
+                                adsList.add(new Ad(username, date, distance, phone, message, new LatLng(userLatitude, userLongitude),
+                                        new LatLng(adLatitude, adLongitude)));
                             }
                          //   dialog.cancel();
                             AdSorter adSorter = new AdSorter(adsList);
@@ -211,16 +243,6 @@ public class HomeActivity extends AppCompatActivity {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 swipeRefreshLayout.setRefreshing(false);
-                                new AlertDialog.Builder(HomeActivity.this).
-                                        setMessage("Check whether you have internet").
-                                        setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                return;
-                                            }
-                                        }).create().show();
-                                error.printStackTrace();
-
                                 VolleyLog.e("Error: ", error.toString());
                                 VolleyLog.e("Error: ", error.getLocalizedMessage());
                             }

@@ -1,5 +1,7 @@
 package com.ansa;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.Comparator;
 
 public class Ad {
@@ -8,13 +10,17 @@ public class Ad {
     double mDistance;
     String mMessage;
     String mPhone;
+    LatLng userLatLng;
+    LatLng adLatLng;
 
-    Ad(String name, String date, double distance, String phone, String message) {
+    Ad(String name, String date, double distance, String phone, String message, LatLng userLatLng, LatLng adLatLng) {
         this.mUsername = name;
         this.mDate = date;
         this.mDistance = distance;
         this.mPhone = phone;
         this.mMessage = message;
+        this.userLatLng = userLatLng;
+        this.adLatLng = adLatLng;
     }
 
     public String getUsername() {
@@ -35,6 +41,14 @@ public class Ad {
 
     public String getMessage() {
         return mMessage;
+    }
+
+    public LatLng getUserLatLng() {
+        return userLatLng;
+    }
+
+    public LatLng getAdLatLng() {
+        return adLatLng;
     }
 
     public static Comparator distanceComparator = new Comparator() {

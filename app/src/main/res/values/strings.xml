@@ -10,4 +10,5 @@
     <string name="create_new_ad"><b>Create new ad</b></string>
     <string name="search">Search…</string>
     <string name="type_here">Type here</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
