@@ -6,16 +6,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -23,11 +20,9 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -101,44 +96,22 @@ public class HomeActivity extends AppCompatActivity {
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
 
-        rv.addOnItemTouchListener(
-                new RecyclerViewItemClickListener(getBaseContext(), rv ,new RecyclerViewItemClickListener.OnItemClickListener() {
-                    @Override public void onItemClick(View view, int position) {
-                        // do whatever
-                        String toPhone = adsList.get(position).getPhone();
-
-                        if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
-                            createMessagePopUp(adsList.get(position).getUsername(), toPhone
-                                    , adsList.get(position).getMessage(), adsList.get(position).getDate());
-                        }
-                    }
-
-                    @Override public void onLongItemClick(View view, int position) {
-                        // do whatever
-                        String toPhone = adsList.get(position).getPhone();
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelable("user_position", adsList.get(position).getUserLatLng());
-                        bundle.putParcelable("ad_position", adsList.get(position).getAdLatLng());
-                        if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
-                            bundle.putString("username", adsList.get(position).getUsername() + " on " +
-                                    adsList.get(position).getDate());
-                        }else {
-                            bundle.putString("username", "You on " + adsList.get(position).getDate());
-                        }
-                        bundle.putString("message", adsList.get(position).getMessage());
-                        Intent intent = new Intent(HomeActivity.this, MapsActivity.class);
-                        intent.putExtra("bundle", bundle);
-                        startActivity(intent);
-
-                    }
-                })
-        );
-
 
         findViewById(R.id.new_ad_text_view).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(HomeActivity.this, NewAdActivity.class));
+                if (getSharedPrefs().get("phone").toString().isEmpty()){
+                    new AlertDialog.Builder(HomeActivity.this).
+                            setMessage("Log in to create a new ad").
+                            setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    startActivity(new Intent(HomeActivity.this, LoginActivity.class));
+                                }
+                            }).create().show();
+                } else {
+                    startActivity(new Intent(HomeActivity.this, NewAdActivity.class));
+                }
             }
         });
 
@@ -161,7 +134,9 @@ public class HomeActivity extends AppCompatActivity {
                     getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
             if ( activeNetwork != null && activeNetwork.isConnected()) {
-                loadLatestAds();
+                if (adsList == null) {
+                    loadLatestAds();
+                }
             }
         }
     };
@@ -267,7 +242,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void initializeAdapter(){
-        RVAdapter adapter = new RVAdapter(adsSortedByDistance);
+        RVAdapter adapter = new RVAdapter(this, adsSortedByDistance);
         rv.setAdapter(adapter);
     }
 

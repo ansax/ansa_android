@@ -9,6 +9,7 @@
     <string name="join_ansa"><b>Join Ansa</b></string>
     <string name="create_new_ad"><b>Create new ad</b></string>
     <string name="search">Search…</string>
-    <string name="type_here">Type here</string>
+    <string name="units">Units (per)</string>
+    <string name="type_here">Advertisement</string>
     <string name="title_activity_maps">Map</string>
 </resources>

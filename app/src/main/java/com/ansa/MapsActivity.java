@@ -1,13 +1,7 @@
 package com.ansa;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -37,14 +31,20 @@ import com.ansa.MapRouteHelpers.VolleySingleton;
 import java.util.ArrayList;
 import java.util.List;
 
+import cc.cloudist.acplibrary.ACProgressConstant;
+import cc.cloudist.acplibrary.ACProgressFlower;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
     LatLng userLatLng;
     LatLng adLatLng;
     String username;
     String message;
-    TextView adMsgTextView;
+    String distance;
+    ACProgressFlower dialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,9 +55,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         userLatLng = bundle.getParcelable("user_position");
         adLatLng = bundle.getParcelable("ad_position");
         username = bundle.getString("username");
+        distance = bundle.getString("distance");
         message = bundle.getString("message");
-        adMsgTextView = (TextView) findViewById(R.id.ad_msg_text_view);
-        adMsgTextView.setText(username);
 
         findViewById(R.id.toolbar_relative_layout).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,6 +64,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 MapsActivity.this.finish();
             }
         });
+
+        TextView title = (TextView) findViewById(R.id.title_text_view);
+        title.setText(distance);
 
 
     }
@@ -75,8 +77,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void drawRoute(LatLng userLatLng, LatLng adLatLng){
-        mMap.addMarker(new MarkerOptions().position(userLatLng).title("You at this moment").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-        mMap.addMarker(new MarkerOptions().position(adLatLng).title(message));
+        mMap.addMarker(new MarkerOptions().position(userLatLng).title("You are here")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))).showInfoWindow();
+        mMap.addMarker(new MarkerOptions().position(adLatLng).title(message).snippet(username)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
         addCameraToMap(userLatLng);
         //use Google Direction API to get the route between these Locations
         String directionApiPath = Helper.getUrl(String.valueOf(userLatLng.latitude), String.valueOf(userLatLng.longitude),
@@ -94,6 +98,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     private void getDirectionFromDirectionApiServer(String url){
+        dialog = new ACProgressFlower.Builder(this)
+                .direction(ACProgressConstant.DIRECT_CLOCKWISE)
+                .themeColor(Color.BLACK)
+                .fadeColor(Color.LTGRAY)
+                .bgColor(Color.WHITE)
+                .petalThickness(3)
+                .petalAlpha(1f)
+                .petalCount(9)
+                .sizeRatio(.2f)
+                .build();
+
+        dialog.show();
+
         GsonRequest<DirectionObject> serverRequest = new GsonRequest<DirectionObject>(
                 Request.Method.GET,
                 url,
@@ -141,6 +158,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         return directionList;
     }
+
     private Response.ErrorListener createRequestErrorListener() {
         return new Response.ErrorListener() {
             @Override
@@ -149,12 +167,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         };
     }
+
     private void drawRouteOnMap(GoogleMap map, List<LatLng> positions){
-        PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE).geodesic(true);
-        options.addAll(positions);
-        options.width(10);
-        options.color(Color.GREEN);
+        PolylineOptions options = new PolylineOptions().width(12).color(Color.GREEN).geodesic(true);
+        options.addAll(positions);;
         map.addPolyline(options);
+        dialog.cancel();
         /*CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(new LatLng(positions.get(1).latitude, positions.get(1).longitude))
                 .zoom(15)

@@ -59,6 +59,39 @@
             android:textColor="@color/colorBlack"
             />
 
+        <RelativeLayout
+            android:layout_below="@+id/msg_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_10">
+
+            <ImageView
+                android:id="@+id/chat_image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/chat"
+                android:tint="@color/colorGreen"
+                android:layout_marginRight="24dp"/>
+
+            <ImageView
+                android:id="@+id/call_image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/call"
+                android:tint="@color/colorGreen"
+                android:layout_toRightOf="@+id/chat_image_view"
+                android:layout_marginRight="24dp"/>
+
+            <ImageView
+                android:id="@+id/direction_image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/directions"
+                android:tint="@color/colorGreen"
+                android:layout_toRightOf="@id/call_image_view"
+                android:layout_marginRight="24dp"/>
+
+        </RelativeLayout>
 
     </RelativeLayout>
 

@@ -99,43 +99,12 @@ public class SearchActivity extends AppCompatActivity {
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
 
-        rv.addOnItemTouchListener(
-                new RecyclerViewItemClickListener(getBaseContext(), rv ,new RecyclerViewItemClickListener.OnItemClickListener() {
-                    @Override public void onItemClick(View view, int position) {
-                        // do whatever
-                        String toPhone = adsList.get(position).getPhone();
-
-                        if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
-                            createMessagePopUp(adsList.get(position).getUsername(), toPhone
-                                    , adsList.get(position).getMessage(), adsList.get(position).getDate());
-                        }
-
-                    }
-
-                    @Override public void onLongItemClick(View view, int position) {
-                        // do whatever
-                        String toPhone = adsList.get(position).getPhone();
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelable("user_position", adsList.get(position).getUserLatLng());
-                        bundle.putParcelable("ad_position", adsList.get(position).getAdLatLng());
-                        if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
-                            bundle.putString("username", adsList.get(position).getUsername() + " on " +
-                                    adsList.get(position).getDate());
-                        }else {
-                            bundle.putString("username", "You on " + adsList.get(position).getDate());
-                        }
-                        bundle.putString("message", adsList.get(position).getMessage());
-                        Intent intent = new Intent(SearchActivity.this, MapsActivity.class);
-                        intent.putExtra("bundle", bundle);
-                        startActivity(intent);
-                    }
-                })
-        );
 
         findViewById(R.id.back_arrow_image_view).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(SearchActivity.this, HomeActivity.class));
+                finish();
+                //startActivity(new Intent(SearchActivity.this, HomeActivity.class));
             }
         });
 
@@ -244,8 +213,8 @@ public class SearchActivity extends AppCompatActivity {
         Network network = new BasicNetwork(new HurlStack());
 
         // Instantiate the request queue
-        mRequestQueue = new RequestQueue(new NoCache(), network);
-        //mRequestQueue = new RequestQueue(cache, network);
+
+        mRequestQueue = new RequestQueue(cache, network);
 
         // Start the queue
         mRequestQueue.start();
@@ -326,7 +295,7 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void initializeAdapter(){
-        RVAdapter adapter = new RVAdapter(adsSortedByDistance);
+        RVAdapter adapter = new RVAdapter(this, adsSortedByDistance);
         rv.setAdapter(adapter);
 
     }

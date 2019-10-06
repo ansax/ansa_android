@@ -21,14 +21,16 @@ android:orientation="vertical">
         />
 
     <TextView
-        android:id="@+id/ad_msg_text_view"
+        android:id="@+id/title_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/create_new_ad"
         android:textColor="@color/colorBlack"
         android:textSize="@dimen/txt_16"
         android:layout_marginLeft="16dp"
         android:layout_toRightOf="@id/back_arrow_image_view"/>
 </RelativeLayout>
+
 
     <fragment
         xmlns:android="http://schemas.android.com/apk/res/android"

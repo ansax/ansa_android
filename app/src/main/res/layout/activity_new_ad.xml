@@ -37,7 +37,7 @@
         android:layout_marginRight="@dimen/dimen_16"
         android:textSize="12sp"
         android:textAlignment="center"
-        android:text="Type your ad then click the green icon below to tag it to your current location"/>
+        android:text="Create your ad then click the green icon below to tag it to your current location"/>
 
 
     <EditText
@@ -54,6 +54,35 @@
         android:maxLength="140"
         android:focusable="true"
         android:clickable="true"
+        />
+
+    <EditText
+        android:id="@+id/price_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:layout_marginLeft="@dimen/dimen_16"
+        android:layout_marginRight="@dimen/dimen_16"
+        android:padding="5dp"
+        android:hint="Price (KES)"
+        android:inputType="numberPassword"
+        android:textColorHint="@color/colorGray"
+        android:background="@drawable/edit_text_bg"
+        android:textSize="@dimen/dimen_16"
+        android:maxLength="10"
+        />
+
+    <EditText
+        android:id="@+id/units_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:layout_margin="@dimen/dimen_16"
+        android:padding="5dp"
+        android:hint="Units: e.g per kg, meter, hour, piece, litre"
+        android:inputType="text"
+        android:textColorHint="@color/colorGray"
+        android:background="@drawable/edit_text_bg"
+        android:textSize="@dimen/dimen_16"
+        android:maxLength="10"
         />
 
     <ImageView

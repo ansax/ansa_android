@@ -9,9 +9,13 @@ import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -28,7 +32,12 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
 import cc.cloudist.acplibrary.ACProgressConstant;
 import cc.cloudist.acplibrary.ACProgressFlower;
@@ -36,7 +45,11 @@ import cc.cloudist.acplibrary.ACProgressFlower;
 public class NewAdActivity extends AppCompatActivity {
 
     EditText mAdMessageEditText;
+    EditText mAdPriceEditText;
+    EditText mAdUnitsEditText;
     String adMessage;
+    String adPrice;
+    String adUnits;
     private static final int SECOND_ACTIVITY_REQUEST_CODE = 2019;
 
     @Override
@@ -45,6 +58,11 @@ public class NewAdActivity extends AppCompatActivity {
         setContentView(R.layout.activity_new_ad);
 
         mAdMessageEditText = (EditText) findViewById(R.id.new_ad_edit_text);
+        mAdPriceEditText = (EditText) findViewById(R.id.price_edit_text);
+        mAdUnitsEditText = (EditText) findViewById(R.id.units_edit_text);
+
+        mAdPriceEditText.setTransformationMethod(new NumericKeyBoardTransformationMethod());
+
 
         findViewById(R.id.toolbar_relative_layout).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,16 +76,51 @@ public class NewAdActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 adMessage = mAdMessageEditText.getText().toString().trim();
-
                 if(adMessage.length() > 2){
-                    Intent intent = new Intent(NewAdActivity.this, LocationActivity.class);
-                    startActivityForResult(intent, SECOND_ACTIVITY_REQUEST_CODE);
+                    formatAdMessage(adMessage);
                 }else {
                     mAdMessageEditText.setError("Make ad more specific");
                 }
+
             }
         });
     }
+
+    private void formatAdMessage(String message){
+        adPrice = mAdPriceEditText.getText().toString().trim();
+
+        if (!adPrice.isEmpty()){
+            NumberFormat numberFormat = new DecimalFormat("#,###,###,###,###,###,###");
+
+            message = message + " at " + numberFormat.format(Long.parseLong(adPrice)) + " bob";
+            adUnits = mAdUnitsEditText.getText().toString().trim();
+            if (!adUnits.isEmpty()){
+                if (adUnits.toLowerCase().contains("per")) {
+                    message = message + " " + adUnits;
+                }else {
+                    message = message + " per " + adUnits;
+                }
+            }
+        }
+
+        final String finalMessage = message;
+        new AlertDialog.Builder(NewAdActivity.this)
+                .setTitle("Confirm your ad")
+                .setMessage(message)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        adMessage = finalMessage;
+                        Intent intent = new Intent(NewAdActivity.this, LocationActivity.class);
+                        startActivityForResult(intent, SECOND_ACTIVITY_REQUEST_CODE);
+                    }}).setNegativeButton("FIX AD", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }}).create().show();
+
+    }
+
 
     public void createAd(String message, String latitude, String longitude){
         final ACProgressFlower dialog = new ACProgressFlower.Builder(this)
@@ -180,4 +233,12 @@ public class NewAdActivity extends AppCompatActivity {
             }
         }
     }
+
+    private class NumericKeyBoardTransformationMethod extends PasswordTransformationMethod {
+        @Override
+        public CharSequence getTransformation(CharSequence source, View view) {
+            return source;
+        }
+    }
+
 }
