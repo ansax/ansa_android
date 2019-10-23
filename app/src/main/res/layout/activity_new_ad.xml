@@ -56,34 +56,54 @@
         android:clickable="true"
         />
 
-    <EditText
-        android:id="@+id/price_edit_text"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:layout_marginLeft="@dimen/dimen_16"
+        android:layout_height="wrap_content"
         android:layout_marginRight="@dimen/dimen_16"
-        android:padding="5dp"
-        android:hint="Price (KES)"
-        android:inputType="numberPassword"
-        android:textColorHint="@color/colorGray"
-        android:background="@drawable/edit_text_bg"
-        android:textSize="@dimen/dimen_16"
-        android:maxLength="10"
-        />
+        android:layout_marginLeft="@dimen/dimen_16"
+        android:layout_marginBottom="@dimen/dimen_16"
+        android:orientation="horizontal">
 
-    <EditText
-        android:id="@+id/units_edit_text"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:layout_margin="@dimen/dimen_16"
-        android:padding="5dp"
-        android:hint="Units: e.g per kg, meter, hour, piece, litre"
-        android:inputType="text"
-        android:textColorHint="@color/colorGray"
-        android:background="@drawable/edit_text_bg"
-        android:textSize="@dimen/dimen_16"
-        android:maxLength="10"
-        />
+        <EditText
+            android:id="@+id/price_edit_text"
+            android:layout_width="108dp"
+            android:layout_height="36dp"
+            android:padding="5dp"
+            android:hint="Price (KES)"
+            android:inputType="numberPassword"
+            android:textColorHint="@color/colorGray"
+            android:background="@drawable/edit_text_bg"
+            android:textSize="@dimen/dimen_16"
+            android:maxLength="10"
+            android:layout_weight="1"
+            />
+
+        <TextView
+            android:layout_toRightOf="@+id/price_edit_text"
+            android:id="@+id/per_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:textSize="16sp"
+            android:text="per"/>
+
+        <EditText
+            android:layout_toRightOf="@+id/per_text_view"
+            android:id="@+id/units_edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:padding="5dp"
+            android:hint="kg, meter, hour, piece, litre"
+            android:inputType="text"
+            android:textColorHint="@color/colorGray"
+            android:background="@drawable/edit_text_bg"
+            android:textSize="@dimen/dimen_16"
+            android:maxLength="10"
+            android:layout_weight="1"
+            />
+
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/pin_image_view"

@@ -170,6 +170,7 @@ public class NewAdActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         mAdMessageEditText.setText(null);
                                         startActivity(new Intent(NewAdActivity.this, HomeActivity.class));
+                                        finish();
                                     }
                                 }).create().show();
                     } },

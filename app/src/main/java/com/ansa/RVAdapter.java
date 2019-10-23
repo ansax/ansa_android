@@ -98,6 +98,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder> 
         personViewHolder.date.setText(ads.get(i).getDate());
         personViewHolder.message.setText(ads.get(i).getMessage());
 
+        final String toPhone = ads.get(i).getPhone();
+
+        if (String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
+            personViewHolder.chat.setVisibility(View.GONE);
+            personViewHolder.call.setVisibility(View.GONE);
+        }
+
         personViewHolder.chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,12 +119,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder> 
                                 }
                             }).create().show();
                 }else {
-                   String toPhone = ads.get(i).getPhone();
-
-                    if (!String.valueOf(getSharedPrefs().get("phone")).equals(toPhone)) {
-                        createMessagePopUp(ads.get(i).getUsername(), toPhone
-                                , ads.get(i).getMessage(), ads.get(i).getDate());
-                    }
+                    createMessagePopUp(ads.get(i).getUsername(), toPhone, ads.get(i).getMessage(), ads.get(i).getDate());
                 }
 
             }
@@ -126,13 +128,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder> 
         personViewHolder.call.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (getSharedPrefs().get("phone") != null) {
-                    if (!getSharedPrefs().get("phone").equals(ads.get(i).getPhone())) {
-                        mContext.startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + ads.get(i).getPhone())));
-                    }
-                } else {
-                    mContext.startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + ads.get(i).getPhone())));
-                }
+                mContext.startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + ads.get(i).getPhone())));
             }
         });
 
@@ -143,7 +139,11 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder> 
                 bundle.putParcelable("user_position", ads.get(i).getUserLatLng());
                 bundle.putParcelable("ad_position", ads.get(i).getAdLatLng());
                 bundle.putString("username", "Ad by " + ads.get(i).getUsername());
-                bundle.putString("distance", "Ad is " + formatDistance(ads.get(i).getDistance()) + " away");
+                if (formatDistance(ads.get(i).getDistance()).equals("Here")){
+                    bundle.putString("distance", "The ad was created right here");
+                }else {
+                    bundle.putString("distance", "Ad is " + formatDistance(ads.get(i).getDistance()) + " away");
+                }
                 bundle.putString("message", ads.get(i).getMessage());
                 Intent intent = new Intent(mContext, MapsActivity.class);
                 intent.putExtra("bundle", bundle);
